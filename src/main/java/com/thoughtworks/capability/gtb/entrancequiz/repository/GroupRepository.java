@@ -7,7 +7,7 @@ import java.util.List;
 
 public class GroupRepository {
 
-    private static final List<Group> groups = new ArrayList<>();
+    private static final List<Group> groups = new ArrayList<>(6);
 
     public List<Group> save(List<Group> groups) {
         GroupRepository.groups.clear();

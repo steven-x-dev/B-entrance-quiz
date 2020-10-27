@@ -1,5 +1,6 @@
 package com.thoughtworks.capability.gtb.entrancequiz.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.capability.gtb.entrancequiz.domain.Student;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -23,6 +23,8 @@ public class StudentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final List<Student> students = new ArrayList<Student>() {{
         add(new Student(1 , "成吉思汗"));
@@ -44,25 +46,27 @@ public class StudentControllerTest {
 
     @Test
     void should_list_all_students_order_by_id_ascending() throws Exception {
-        ResultActions resultActions = mockMvc
-                .perform(get("/students"))
+        mockMvc.perform(get("/students"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-        validateListStudentResult(resultActions, students);
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(result -> {
+                    String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    Student[] deserialized = objectMapper.readValue(content, Student[].class);
+                    validateListStudentResult(students, deserialized);
+                });
     }
 
-    void validateListStudentResult(ResultActions resultActions, List<Student> expected) throws Exception {
+    void validateListStudentResult(List<Student> expected, Student[] actual) {
         Integer prevId = null;
         for (int i = 0; i < expected.size(); i++) {
-            Student student = expected.get(i);
-            Integer currId = student.getId();
+            Student expectedStudent = expected.get(i);
+            Student actualStudent = actual[i];
+            Integer currId = actualStudent.getId();
             if (prevId != null) {
                 assertTrue(currId > prevId);
             }
             prevId = currId;
-            resultActions
-                    .andExpect(jsonPath(String.format("$[%d].id"  , i), is(student.getId())))
-                    .andExpect(jsonPath(String.format("$[%d].name", i), is(student.getName())));
+            assertEquals(expectedStudent, actualStudent);
         }
     }
 
