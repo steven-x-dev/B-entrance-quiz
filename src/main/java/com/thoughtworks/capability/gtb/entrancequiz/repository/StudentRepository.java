@@ -29,4 +29,12 @@ public class StudentRepository {
         return new ArrayList<>(students);
     }
 
+    public Student save(Student student) {
+        int id = students.size() + 1;
+        String name = student.getName();
+        Student saved = new Student(id, name);
+        students.add(saved);
+        return saved;
+    }
+
 }
