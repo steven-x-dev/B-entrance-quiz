@@ -11,12 +11,12 @@ public class GroupRepository {
 
     public List<Group> save(List<Group> groups) {
         GroupRepository.groups.clear();
-        GroupRepository.groups.addAll(groups);
-        return GroupRepository.groups;
+        GroupRepository.groups.addAll(CloneUtil.cloneGroups(groups));
+        return CloneUtil.cloneGroups(GroupRepository.groups);
     }
 
     public List<Group> findAll() {
-        return new ArrayList<>(groups);
+        return CloneUtil.cloneGroups(groups);
     }
 
 }

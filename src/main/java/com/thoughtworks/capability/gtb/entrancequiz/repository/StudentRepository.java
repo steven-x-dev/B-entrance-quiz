@@ -26,7 +26,7 @@ public class StudentRepository {
     }};
 
     public List<Student> findAll() {
-        return new ArrayList<>(students);
+        return CloneUtil.cloneStudents(students);
     }
 
     public Student save(Student student) {
@@ -34,7 +34,7 @@ public class StudentRepository {
         String name = student.getName();
         Student saved = new Student(id, name);
         students.add(saved);
-        return saved;
+        return new Student(saved.getId(), saved.getName());
     }
 
 }
