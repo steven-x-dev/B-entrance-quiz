@@ -2,7 +2,10 @@ package com.thoughtworks.capability.gtb.entrancequiz.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.capability.gtb.entrancequiz.domain.Student;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +18,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StudentControllerTest {
 
     @Autowired
@@ -45,6 +50,7 @@ public class StudentControllerTest {
     }};
 
     @Test
+    @Order(1)
     void should_list_all_students_order_by_id_ascending() throws Exception {
         mockMvc.perform(get("/students"))
                 .andExpect(status().isOk())
@@ -68,6 +74,59 @@ public class StudentControllerTest {
             prevId = currId;
             assertEquals(expectedStudent, actualStudent);
         }
+    }
+
+    @Test
+    @Order(2)
+    void should_add_student() throws Exception {
+        Student newStudent = new Student();
+        newStudent.setName("小乔");
+        String serialized = objectMapper.writeValueAsString(newStudent);
+        mockMvc.perform(post("/student")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8.name())
+                .content(serialized))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(result -> {
+                    String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    Student deserialized = objectMapper.readValue(content, Student.class);
+                    assertEquals(newStudent.getName(), deserialized.getName());
+                });
+    }
+
+    @Test
+    @Order(3)
+    void should_add_student_with_existing_name() throws Exception {
+        Student newStudent = new Student();
+        newStudent.setName(students.get(0).getName());
+        String serialized = objectMapper.writeValueAsString(newStudent);
+        mockMvc.perform(post("/student")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8.name())
+                .content(serialized))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(result -> {
+                    String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    Student deserialized = objectMapper.readValue(content, Student.class);
+                    assertEquals(newStudent.getName(), deserialized.getName());
+                });
+    }
+
+    @Test
+    @Order(4)
+    void should_receive_error_when_add_student_given_null_name() throws Exception {
+        Student newStudent = new Student();
+        String serialized = objectMapper.writeValueAsString(newStudent);
+        mockMvc.perform(post("/student")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8.name())
+                .content(serialized))
+                .andExpect(status().isBadRequest());
     }
 
 }
