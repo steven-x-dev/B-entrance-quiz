@@ -30,7 +30,7 @@ public class StudentController {
 
     @PostMapping(path = "/student")
     public ResponseEntity<Student> create(@RequestBody @Validated Student student) {
-        Student created = studentService.add(student);
+        Student created = studentService.create(student);
         return ResponseEntity.created(null).body(created);
     }
 

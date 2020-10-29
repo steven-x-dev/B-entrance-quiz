@@ -22,7 +22,7 @@ public class StudentService {
         return students.stream().sorted(Comparator.comparing(Student::getId)).collect(Collectors.toList());
     }
 
-    public Student add(Student student) {
+    public Student create(Student student) {
         return studentRepository.save(student);
     }
 
