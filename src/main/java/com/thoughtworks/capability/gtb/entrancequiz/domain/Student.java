@@ -13,6 +13,7 @@ public class Student {
 
     private Integer id;
 
+    //TODO GTB-完成度: + 校验 name 不能为空
     @NotNull
     private String name;
 

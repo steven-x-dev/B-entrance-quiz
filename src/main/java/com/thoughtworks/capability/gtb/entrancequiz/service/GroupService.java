@@ -42,6 +42,7 @@ public class GroupService {
                 int index = (int) (Math.random() * students.size());
                 Student student = students.get(index);
                 group.addStudent(student);
+                //TODO GTB-完成度: - remove 了，下次再分组时还有吗？
                 students.remove(student);
             }
         }
